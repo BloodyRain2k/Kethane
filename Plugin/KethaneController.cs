@@ -98,7 +98,7 @@ namespace Kethane
             }
         }
 
-        public void DrawMap(bool deposit)
+        public void DrawMap(bool deposit, double varLat = 0, double varLon = 0)
         {
             if (Vessel.mainBody != null && PlanetTextures.ContainsKey(Vessel.mainBody.name))
             {
@@ -106,8 +106,8 @@ namespace Kethane
 
                 if (this.Vessel != null)
                 {
-                    int x = Misc.GetXOnMap(Misc.clampDegrees(Vessel.mainBody.GetLongitude(Vessel.transform.position)), planetTex.width);
-                    int y = Misc.GetYOnMap(Vessel.mainBody.GetLatitude(Vessel.transform.position), planetTex.height);
+                    int x = Misc.GetXOnMap(Misc.clampDegrees(Vessel.mainBody.GetLongitude(Vessel.transform.position) + varLon), planetTex.width);
+                    int y = Misc.GetYOnMap(Math.Max(Math.Min(Vessel.mainBody.GetLatitude(Vessel.transform.position) + varLat, 90), -90), planetTex.height);
                     if (deposit)
                         planetTex.SetPixel(x, y, XKCDColors.Green);
                     else
@@ -177,25 +177,34 @@ namespace Kethane
             }
         }
 
-        public KethaneDeposit GetDepositUnder()
+        public KethaneDeposit GetDepositUnder(double varLat = 0, double varLon = 0)
         {
             if (!PlanetDeposits.ContainsKey(Vessel.mainBody.name)) { return null; }
             KethaneDeposits Deposits = KethaneController.PlanetDeposits[Vessel.mainBody.name];
 
-            double lon = Misc.clampDegrees(Vessel.mainBody.GetLongitude(Vessel.transform.position));
-            double lat = Vessel.mainBody.GetLatitude(Vessel.transform.position);
+            double lon = Misc.clampDegrees(Vessel.mainBody.GetLongitude(Vessel.transform.position) + varLon);
+            double lat = Math.Max(Math.Min(Vessel.mainBody.GetLatitude(Vessel.transform.position) + varLat, 90), -90);
 
             double x = Math.Round((lon + 180d) * (Deposits.Width / 360d));
             double y = Math.Round(((90d - lat) * (Deposits.Height / 180d)));
 
             Vector3 PointUnder = new Vector3((float)x, 0, (float)y);
+            
+            var ret = Deposits.GetDepositOver(PointUnder);
+            
+            if (ret != null) {
+							var efile = KSP.IO.File.AppendText<KethaneController>(Vessel.mainBody.name + "_kethane.csv", null);
+							efile.WriteLine(string.Format("{0:0.00};{1:0.00};{2};{3}", lon, lat, ret.Depth, ret.Kethane));
+							efile.Close();
+            }
 
-            return Deposits.GetDepositOver(PointUnder);
+            return ret;
         }
 
         public bool ShowDetectorWindow;
 
-        public bool ScanningSound = true;
+        public bool ScanningSound = false;
+        public bool StoreCSV = false;
 
         public double LastLat, LastLon;
         public float LastQuantity;
@@ -244,7 +253,8 @@ namespace Kethane
 
             GUILayout.Label(String.Format("Last deposit: {0:0.000}, {1:0.000} ({2:F0}L)", LastLat, LastLon, LastQuantity));
             ScanningSound = GUILayout.Toggle(ScanningSound, "Detection sound");
-
+						StoreCSV = GUILayout.Toggle(StoreCSV, "Store Deposits to CSV");
+            
             GUILayout.EndVertical();
             GUI.DragWindow(new Rect(0, 0, 300, 60));
             #endregion

@@ -124,7 +124,7 @@ namespace Kethane
             this.part.force_activate();
             #region Sound effects
             PingEmpty = gameObject.AddComponent<AudioSource>();
-            WWW wwwE = new WWW("file://" + KSPUtil.ApplicationRootPath.Replace("\\", "/") + "PluginData/mmi_kethane/sounds/echo_empty.wav");
+            WWW wwwE = new WWW("file://" + KSPUtil.ApplicationRootPath.Replace("\\", "/") + "GameData/Kethane/Plugins/PluginData/MMI_Kethane/sounds/echo_empty.wav");
             if ((PingEmpty != null) && (wwwE != null))
             {
                 PingEmpty.clip = wwwE.GetAudioClip(false);
@@ -133,7 +133,7 @@ namespace Kethane
             }
 
             PingDeposit = gameObject.AddComponent<AudioSource>();
-            WWW wwwD = new WWW("file://" + KSPUtil.ApplicationRootPath.Replace("\\", "/") + "PluginData/mmi_kethane/sounds/echo_deposit.wav");
+            WWW wwwD = new WWW("file://" + KSPUtil.ApplicationRootPath.Replace("\\", "/") + "GameData/Kethane/Plugins/PluginData/MMI_Kethane/sounds/echo_deposit.wav");
             if ((PingDeposit != null) && (wwwD != null))
             {
                 PingDeposit.clip = wwwD.GetAudioClip(false);
@@ -219,16 +219,17 @@ namespace Kethane
 
         		if (TimerEcho >= TimerThreshold)
         		{
-        			var ping = 0;
+        			var ping = false;
         			
         			var variation = Math.Sqrt(Math.Pow(Altitude / Math.Cos(5 * Math.PI / 180), 2) - Math.Pow(Altitude, 2)); // variation in meter?
         			variation = variation / (vessel.mainBody.Radius * 2 * Math.PI) * 360; // variation in planetary degree?
-        			//                		print("V: " + variation.ToString("F5"));
-        			//                		variation = 10;
+//            		print("V: " + variation.ToString("F5"));
+//            		variation = 10;
         			
         			var DepositUnder = controller.GetDepositUnder();
         			if (DepositUnder != null && DepositUnder.Kethane >= 1.0f)
         			{
+        				ping = true;
         				controller.DrawMap(true);
         				controller.LastLat = vessel.latitude;
         				controller.LastLon = Misc.clampDegrees(vessel.longitude);
@@ -246,6 +247,7 @@ namespace Kethane
         				DepositUnder = controller.GetDepositUnder(lat, lon);
         				if (DepositUnder != null && DepositUnder.Kethane >= 1.0f)
         				{
+        					ping = true;
         					controller.DrawMap(true, lat, lon);
         					controller.LastLat = vessel.latitude + lat;
         					controller.LastLon = Misc.clampDegrees(vessel.longitude + lon);
@@ -258,10 +260,10 @@ namespace Kethane
         			}
         			
         			if (vessel == FlightGlobals.ActiveVessel && controller.ScanningSound) {
-        				if (ping == 0) {
-        					PingEmpty.Play();
-        				} else {
+        				if (ping) {
         					PingDeposit.Play();
+        				} else {
+        					PingEmpty.Play();
         				}
         			}
         			
@@ -276,7 +278,7 @@ namespace Kethane
 
         public override void OnSave(ConfigNode node)
         {
-            KethaneController.GetInstance(this.vessel).SaveAndLoadState();
+            KethaneController.GetInstance(this.vessel).SaveAllMaps();
         }
     }
 }

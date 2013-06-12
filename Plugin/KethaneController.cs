@@ -85,6 +85,28 @@ namespace Kethane
                     PlanetTextures[body.name].Apply();
                 }
             }
+            if (!KSP.IO.File.Exists<KethaneController>("YouAreHereMarker.png"))
+            {
+            	Color col = new Color(0.5f, 1.0f, 0.0f, 0.75f);
+            	Texture2D dot = new Texture2D(5, 5, TextureFormat.ARGB32, false);
+            	
+            	dot.SetPixels(0, 0, 5, 5, new Color[] { new Color(0,0,0,0) });
+            	
+            	dot.SetPixel(0, 2, col);
+
+            	dot.SetPixel(1, 1, col);
+            	dot.SetPixel(1, 3, col);
+
+            	dot.SetPixel(2, 0, col);
+            	dot.SetPixel(2, 4, col);
+
+            	dot.SetPixel(3, 1, col);
+            	dot.SetPixel(3, 3, col);
+
+            	dot.SetPixel(4, 2, col);
+            	
+            	KSP.IO.File.WriteAllBytes<KethaneController>(dot.EncodeToPNG(), "YouAreHereMarker.png");
+            }
             youAreHereMarker.LoadImage(KSP.IO.File.ReadAllBytes<KethaneController>("YouAreHereMarker.png"));
         }
 
@@ -241,7 +263,7 @@ namespace Kethane
 
                 int x = Misc.GetXOnMap(Misc.clampDegrees(Vessel.mainBody.GetLongitude(Vessel.transform.position)), planetTex.width);
                 int y = Misc.GetYOnMap(Vessel.mainBody.GetLatitude(Vessel.transform.position), planetTex.height);
-                GUI.DrawTexture(new Rect(((Last.xMin + Last.xMax) / 2) - (planetTex.width / 2) + x - (youAreHereMarker.width / 2), ((Last.yMin + Last.yMax) / 2) + (planetTex.height / 2) - y - (youAreHereMarker.height / 2), 7, 7), youAreHereMarker);
+                GUI.DrawTexture(new Rect(((Last.xMin + Last.xMax) / 2) - (planetTex.width / 2) + x - Mathf.Ceil(youAreHereMarker.width / 2), ((Last.yMin + Last.yMax) / 2) + (planetTex.height / 2) - y - Mathf.Ceil(youAreHereMarker.height / 2), youAreHereMarker.width, youAreHereMarker.height), youAreHereMarker);
 
                 float xVar = ((Last.xMin + Last.xMax) / 2) - (planetTex.width / 2) + DetectorWindowPosition.x;
                 float yVar = ((Last.yMin + Last.yMax) / 2) - (planetTex.height / 2) + DetectorWindowPosition.y;

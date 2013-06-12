@@ -9,13 +9,13 @@ namespace Kethane
     public class KethaneDetector : PartModule
     {
         [KSPField(isPersistant = false)]
-        public float DetectingPeriod;
+        public float DetectingPeriod = 1.2f;
 
         [KSPField(isPersistant = false)]
-        public float DetectingHeight;
+        public float DetectingHeight = 300000;
 
         [KSPField(isPersistant = false)]
-        public float PowerConsumption;
+        public float PowerConsumption = 0.8f;
 
         [KSPField(isPersistant = false)]
         public string BaseTransform;
@@ -67,6 +67,24 @@ namespace Kethane
         public void ToggleDetectionAction(KSPActionParam param)
         {
             IsDetecting = !IsDetecting;
+        }
+
+        [KSPAction("Show Map")]
+        public void ShowMapAction(KSPActionParam param)
+        {
+            ShowMap();
+        }
+
+        [KSPAction("Hide Map")]
+        public void HideMapAction(KSPActionParam param)
+        {
+            HideMap();
+        }
+
+        [KSPAction("Toggle Map")]
+        public void ToggleMapAction(KSPActionParam param)
+        {
+            KethaneController.GetInstance(this.vessel).ShowDetectorWindow = !KethaneController.GetInstance(this.vessel).ShowDetectorWindow;
         }
 
         [KSPEvent(guiActive = true, guiName = "Show Map", active = true)]
@@ -188,72 +206,72 @@ namespace Kethane
 
         public override void OnFixedUpdate()
         {
-            var controller = KethaneController.GetInstance(this.vessel);
-            double Altitude = Misc.GetTrueAltitude(vessel);
-            if (IsDetecting && this.vessel != null && this.vessel.gameObject.activeSelf && Altitude <= this.DetectingHeight)
-            {
-                var energyRequest = PowerConsumption * TimeWarp.fixedDeltaTime;
-                var energyDrawn = this.part.RequestResource("ElectricCharge", energyRequest);
-                this.powerRatio = energyDrawn / energyRequest;
-                TimerEcho += Time.deltaTime * (1 + Math.Log(TimeWarp.CurrentRate)) * this.powerRatio;
+        	var controller = KethaneController.GetInstance(this.vessel);
+        	double Altitude = Misc.GetTrueAltitude(vessel);
+        	if (IsDetecting && this.vessel != null && this.vessel.gameObject.activeSelf && Altitude <= this.DetectingHeight)
+        	{
+        		var energyRequest = PowerConsumption * TimeWarp.fixedDeltaTime;
+        		var energyDrawn = this.part.RequestResource("ElectricCharge", energyRequest);
+        		this.powerRatio = energyDrawn / energyRequest;
+        		TimerEcho += Time.deltaTime * (1 + Math.Log(TimeWarp.CurrentRate)) * this.powerRatio;
 
-                var TimerThreshold = this.DetectingPeriod + Altitude * 0.000005d; // 0,5s delay at 100km
+        		var TimerThreshold = this.DetectingPeriod + Altitude * 0.000005d; // 0,5s delay at 100km
 
-                if (TimerEcho >= TimerThreshold)
-                {
-                		var ping = 0;
-                		
-                		var variation = Math.Sqrt(Math.Pow(Altitude / Math.Cos(5 * Math.PI / 180), 2) - Math.Pow(Altitude, 2)); // variation in meter?
-                		variation = variation / (vessel.mainBody.Radius * 2 * Math.PI) * 360; // variation in planetary degree?
-//                		print("V: " + variation.ToString("F5"));
-//                		variation = 10;
-                		                		
-		                var DepositUnder = controller.GetDepositUnder();
-                    if (DepositUnder != null && DepositUnder.Kethane >= 1.0f)
-                    {
-                        controller.DrawMap(true);
-                        controller.LastLat = vessel.latitude;
-                        controller.LastLon = Misc.clampDegrees(vessel.longitude);
-                        controller.LastQuantity = DepositUnder.Kethane;
-                    }
-                    else
-                    {
-                        controller.DrawMap(false);
-                    }
-                		
-                		for (int i = 0; i < 8; i++) {
-                    	var lat = Math.Cos(Math.PI / 4 * i) * variation;
-                    	var lon = Math.Sin(Math.PI / 4 * i) * variation;
-                    	
-                    	DepositUnder = controller.GetDepositUnder(lat, lon);
-	                    if (DepositUnder != null && DepositUnder.Kethane >= 1.0f)
-	                    {
-	                    		controller.DrawMap(true, lat, lon);
-	                        controller.LastLat = vessel.latitude + lat;
-	                        controller.LastLon = Misc.clampDegrees(vessel.longitude + lon);
-	                        controller.LastQuantity = DepositUnder.Kethane;
-	                    }
-	                    else
-	                    {
-	                        controller.DrawMap(false, lat, lon);
-	                    }
-                		}
-                    
-                    if (vessel == FlightGlobals.ActiveVessel && controller.ScanningSound) {
-                    	if (ping == 0) {
-												PingEmpty.Play();
-                    	} else {
-												PingDeposit.Play();
-                    	}
-                    }
-                    
-                    TimerEcho = 0;
-                }
-            }
-            else
-            {
-                this.powerRatio = 0;
-            }
+        		if (TimerEcho >= TimerThreshold)
+        		{
+        			var ping = 0;
+        			
+        			var variation = Math.Sqrt(Math.Pow(Altitude / Math.Cos(5 * Math.PI / 180), 2) - Math.Pow(Altitude, 2)); // variation in meter?
+        			variation = variation / (vessel.mainBody.Radius * 2 * Math.PI) * 360; // variation in planetary degree?
+        			//                		print("V: " + variation.ToString("F5"));
+        			//                		variation = 10;
+        			
+        			var DepositUnder = controller.GetDepositUnder();
+        			if (DepositUnder != null && DepositUnder.Kethane >= 1.0f)
+        			{
+        				controller.DrawMap(true);
+        				controller.LastLat = vessel.latitude;
+        				controller.LastLon = Misc.clampDegrees(vessel.longitude);
+        				controller.LastQuantity = DepositUnder.Kethane;
+        			}
+        			else
+        			{
+        				controller.DrawMap(false);
+        			}
+        			
+        			for (int i = 0; i < 8; i++) {
+        				var lat = Math.Cos(Math.PI / 4 * i) * variation;
+        				var lon = Math.Sin(Math.PI / 4 * i) * variation;
+        				
+        				DepositUnder = controller.GetDepositUnder(lat, lon);
+        				if (DepositUnder != null && DepositUnder.Kethane >= 1.0f)
+        				{
+        					controller.DrawMap(true, lat, lon);
+        					controller.LastLat = vessel.latitude + lat;
+        					controller.LastLon = Misc.clampDegrees(vessel.longitude + lon);
+        					controller.LastQuantity = DepositUnder.Kethane;
+        				}
+        				else
+        				{
+        					controller.DrawMap(false, lat, lon);
+        				}
+        			}
+        			
+        			if (vessel == FlightGlobals.ActiveVessel && controller.ScanningSound) {
+        				if (ping == 0) {
+        					PingEmpty.Play();
+        				} else {
+        					PingDeposit.Play();
+        				}
+        			}
+        			
+        			TimerEcho = 0;
+        		}
+        	}
+        	else
+        	{
+        		this.powerRatio = 0;
+        	}
         }
 
         public override void OnSave(ConfigNode node)

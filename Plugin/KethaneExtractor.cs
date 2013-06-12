@@ -249,12 +249,12 @@ namespace Kethane
         {
             #region Handle deploying
 
-            if (TimeWarp.CurrentRateIndex == 0)
+            if (TimeWarp.CurrentRateIndex <= 4)
             {
                 if (ArmWantToGoDown)
-                    HandleDeployment(Time.deltaTime);
+                    HandleDeployment(TimeWarp.fixedDeltaTime);
                 else
-                    HandleDeployment(Time.deltaTime, false);
+                    HandleDeployment(TimeWarp.fixedDeltaTime, false);
             }
             #endregion
             #region Check ground interaction
@@ -362,9 +362,12 @@ namespace Kethane
 
         public override void OnFixedUpdate()
         {
+            
+        	if (this.vessel == null || this.DrillDeploymentState != KethaneExtractor.DeployState.Deployed) { return; }
+        		
             var DepositUnder = KethaneController.GetInstance(this.vessel).GetDepositUnder();
 
-            if (this.vessel != null && DepositUnder != null && this.DrillDeploymentState == KethaneExtractor.DeployState.Deployed)
+            if (DepositUnder != null)
             {
                 if (TimeWarp.WarpMode == TimeWarp.Modes.HIGH && TimeWarp.CurrentRateIndex > 0)
                 {

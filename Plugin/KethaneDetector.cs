@@ -74,7 +74,7 @@ namespace Kethane
         [KSPAction("Toggle Map")]
         public void ToggleMapAction(KSPActionParam param)
         {
-            KethaneController.GetInstance(this.vessel).ShowDetectorWindow = !KethaneController.GetInstance(this.vessel).ShowDetectorWindow;
+            KethaneController.GetInstance(vessel).ShowDetectorWindow = !KethaneController.GetInstance(vessel).ShowDetectorWindow;
         }
 
         [KSPEvent(guiActive = true, guiName = "Show Map", active = true)]
@@ -112,6 +112,7 @@ namespace Kethane
         {
             if (state == StartState.Editor) { return; }
             this.part.force_activate();
+            if (IsDetecting) { KethaneController.GetInstance(vessel).ShowDetectorWindow = true; }
             #region Sound effects
             PingEmpty = gameObject.AddComponent<AudioSource>();
             WWW wwwE = new WWW("file://" + KSPUtil.ApplicationRootPath.Replace("\\", "/") + "GameData/Kethane/Plugins/PluginData/MMI_Kethane/sounds/echo_empty.wav");
@@ -147,7 +148,7 @@ namespace Kethane
         {
             Events["EnableDetection"].active = !IsDetecting;
             Events["DisableDetection"].active = IsDetecting;
-            var controller = KethaneController.GetInstance(this.vessel);
+            var controller = KethaneController.GetInstance(vessel);
             Events["ShowMap"].active = !controller.ShowDetectorWindow;
             Events["HideMap"].active = controller.ShowDetectorWindow;
 

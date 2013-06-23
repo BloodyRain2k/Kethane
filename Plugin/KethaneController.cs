@@ -397,7 +397,7 @@ namespace Kethane
                 if (deposit.Shape.PointInPolygon(new Vector2(x, y)))
                 {
 		            if (StoreCSV && deposit != null) {
-                		var efile = KSP.IO.File.AppendText<KethaneController>(string.Format("{0}_{1}_{2}.csv", body.name, depositSeed,resourceName), null);
+                		var efile = KSP.IO.File.AppendText<KethaneController>(string.Format("{0}_{1}_{2}.csv", resourceName, depositSeed, body.name), null);
 						efile.WriteLine(string.Format("{0:0.00};{1:0.00};{2}", lon, lat, deposit.Quantity));
 						efile.Close();
 		            }

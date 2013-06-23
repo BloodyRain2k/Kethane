@@ -92,16 +92,16 @@ namespace Kethane
         [KSPField(isPersistant = false, guiActive = true, guiName = "Status")]
         public string Status;
 
-        [KSPEvent(guiActive = true, guiName = "Re-Gen", active = true)]
-        public void ReGen()
-        {
-            var controller = KethaneController.GetInstance(this.vessel);
-            var sc = new System.Diagnostics.Stopwatch();
-            sc.Start();
-            while (controller.GetDepositUnder() == null && sc.ElapsedMilliseconds <= 5000) {
-                controller.GenerateKethaneDeposits();
-            }
-        }
+//        [KSPEvent(guiActive = true, guiName = "Re-Gen", active = true)]
+//        public void ReGen()
+//        {
+//            var controller = KethaneController.GetInstance(this.vessel);
+//            var sc = new System.Diagnostics.Stopwatch();
+//            sc.Start();
+//            while (controller.GetDepositUnder() == null && sc.ElapsedMilliseconds <= 5000) {
+//                controller.GenerateKethaneDeposits();
+//            }
+//        }
 
         public override string GetInfo()
         {

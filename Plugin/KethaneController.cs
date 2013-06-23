@@ -131,7 +131,7 @@ namespace Kethane
                     if (!PlanetTextures.ContainsKey(resourceName))
                     {
                         PlanetTextures[resourceName] = new Dictionary<string, Texture2D>();
-                }
+                	}
                     if (!PlanetTextures[resourceName].ContainsKey(body.name))
                     {
                         PlanetTextures[resourceName].Add(body.name, new Texture2D(256, 128, TextureFormat.ARGB32, false));
@@ -140,12 +140,13 @@ namespace Kethane
                     {
                         PlanetTextures[resourceName][body.name].LoadImage(KSP.IO.File.ReadAllBytes<KethaneController>(getMapFilename(body, resourceName)));
                     }
-                else
-                {
+	                else
+	                {
                         for (int y = 0; y < PlanetTextures[resourceName][body.name].height; y++)
                             for (int x = 0; x < PlanetTextures[resourceName][body.name].width; x++)
                                 PlanetTextures[resourceName][body.name].SetPixel(x, y, Color.black);
                         PlanetTextures[resourceName][body.name].Apply();
+	                }
                 }
             }
             if (!KSP.IO.File.Exists<KethaneController>("YouAreHereMarker.png"))
@@ -202,8 +203,8 @@ namespace Kethane
 
                 if (this.Vessel != null)
                 {
-                    int x = Misc.GetXOnMap(Misc.clampDegrees(Vessel.mainBody.GetLongitude(Vessel.transform.position) + varLon), planetTex.width);
-                    int y = Misc.GetYOnMap(Math.Max(Math.Min(Vessel.mainBody.GetLatitude(Vessel.transform.position) + varLat, 90), -90), planetTex.height);
+                    int x = Misc.GetXOnMap(Misc.clampDegrees(Vessel.mainBody.GetLongitude(Vessel.transform.position)), planetTex.width);
+                    int y = Misc.GetYOnMap(Vessel.mainBody.GetLatitude(Vessel.transform.position), planetTex.height);
                     if (deposit)
                     {
                         float ratio = GetDepositUnder(resourceName).InitialQuantity / definition.MaxQuantity;
@@ -390,21 +391,18 @@ namespace Kethane
 
             var x = (float)Math.Round(lon + 180d);
             var y = (float)Math.Round(90d - lat);
-            
-            var ret = Deposits.GetDepositOver(PointUnder);
-            
-            if (StoreCSV && ret != null) {
-				var efile = KSP.IO.File.AppendText<KethaneController>(Vessel.mainBody.name + "_kethane.csv", null);
-				efile.WriteLine(string.Format("{0:0.00};{1:0.00};{2}", lon, lat, ret.Kethane));
-				efile.Close();
-            }
 
             foreach (Deposit deposit in PlanetDeposits[resourceName][body.name])
             {
                 if (deposit.Shape.PointInPolygon(new Vector2(x, y)))
                 {
+		            if (StoreCSV && deposit != null) {
+                		var efile = KSP.IO.File.AppendText<KethaneController>(string.Format("{0}_{1}_{2}.csv", body.name, depositSeed,resourceName), null);
+						efile.WriteLine(string.Format("{0:0.00};{1:0.00};{2}", lon, lat, deposit.Quantity));
+						efile.Close();
+		            }
                     return deposit;
-        }
+        		}
             }
             return null;
         }

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Kethane
 {
-    internal class GeodesicGrid : IEnumerable<GeodesicGrid.Cell>, IEquatable<GeodesicGrid>
+    public class GeodesicGrid : IEnumerable<GeodesicGrid.Cell>, IEquatable<GeodesicGrid>
     {
         private readonly int n;
 

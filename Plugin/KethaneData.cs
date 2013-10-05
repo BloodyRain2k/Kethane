@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Kethane
 {
-    internal class KethaneData : ScenarioModule
+    public class KethaneData : ScenarioModule
     {
         public static KethaneData Current
         {

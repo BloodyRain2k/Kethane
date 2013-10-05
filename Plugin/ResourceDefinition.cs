@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Kethane
 {
-    internal class ResourceDefinition
+    public class ResourceDefinition
     {
         public string Resource { get; private set; }
         public float MinRadius { get; private set; }

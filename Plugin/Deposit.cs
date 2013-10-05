@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Kethane
 {
-    internal class Polygon
+    public class Polygon
     {
         private Vector2[] _vertices;
 
@@ -35,7 +35,7 @@ namespace Kethane
         }
     }
 
-    internal class Deposit
+    public class Deposit
     {
         public Polygon Shape;
 
